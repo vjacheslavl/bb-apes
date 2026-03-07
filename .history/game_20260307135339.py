@@ -110,6 +110,7 @@ MAX_HP = 3
 MEDKIT_COLOR = (255, 100, 100)
 AMMO_COLOR = (100, 200, 100)
 EXIT_COLOR = (100, 200, 255)
+POINTS_TO_EXIT = 3
 ZOMBIE_COLOR = (100, 150, 80)
 ZOMBIE_SPEED = 0.5
 ZOMBIE_HP = 2
@@ -117,63 +118,20 @@ ZOMBIE_SIZE = 40
 
 font = None
 
-LEVEL_DATA = [
-    {
-        "points_to_exit": 3,
-        "map": [
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 4, 1],
-            [1, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 5, 1],
-            [1, 0, 3, 0, 0, 5, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 1, 3, 0, 0, 0, 0, 1, 0, 0, 1],
-            [1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1],
-            [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 1],
-            [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        ]
-    },
-    {
-        "points_to_exit": 5,
-        "map": [
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1],
-            [1, 0, 1, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 1, 0, 1],
-            [1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 2, 1, 0, 0, 5, 0, 1, 1, 0, 5, 0, 0, 1, 3, 1],
-            [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-            [1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1],
-            [1, 0, 1, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 1, 0, 1],
-            [1, 0, 1, 1, 0, 0, 3, 0, 0, 3, 0, 0, 1, 1, 4, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        ]
-    },
-    {
-        "points_to_exit": 8,
-        "map": [
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
-            [1, 0, 5, 0, 1, 0, 5, 0, 0, 5, 0, 1, 0, 5, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 3, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 3, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 5, 0, 1, 0, 5, 0, 4, 5, 0, 1, 0, 5, 0, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        ]
-    },
+LEVEL_MAP = [
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 4, 1],
+    [1, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 5, 1],
+    [1, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 1, 3, 0, 0, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 1],
+    [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ]
-
-def get_current_level_data(level):
-    idx = min(level - 1, len(LEVEL_DATA) - 1)
-    return LEVEL_DATA[idx]
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("WASD Movement Game")
@@ -263,14 +221,14 @@ class Exit:
         ])
 
 
-def find_path(start_x, start_y, target_x, target_y, level_map):
+def find_path(start_x, start_y, target_x, target_y):
     start_col = int(start_x // TILE_SIZE)
     start_row = int(start_y // TILE_SIZE)
     target_col = int(target_x // TILE_SIZE)
     target_row = int(target_y // TILE_SIZE)
 
-    rows = len(level_map)
-    cols = len(level_map[0])
+    rows = len(LEVEL_MAP)
+    cols = len(LEVEL_MAP[0])
 
     if start_row < 0 or start_row >= rows or start_col < 0 or start_col >= cols:
         return None
@@ -292,7 +250,7 @@ def find_path(start_x, start_y, target_x, target_y, level_map):
             new_row, new_col = row + dr, col + dc
 
             if 0 <= new_row < rows and 0 <= new_col < cols:
-                if (new_row, new_col) not in visited and level_map[new_row][new_col] != 1:
+                if (new_row, new_col) not in visited and LEVEL_MAP[new_row][new_col] != 1:
                     new_path = path + [(new_row, new_col)]
 
                     if (new_row, new_col) == (target_row, target_col):
@@ -319,7 +277,7 @@ class Zombie:
     def get_rect(self):
         return pygame.Rect(self.x, self.y, self.width, self.height)
 
-    def update(self, player, walls, level_map):
+    def update(self, player, walls):
         if not self.alive:
             return
 
@@ -331,7 +289,7 @@ class Zombie:
         player_cx = player.x + player.width // 2
         player_cy = player.y + player.height // 2
 
-        path = find_path(zombie_cx, zombie_cy, player_cx, player_cy, level_map)
+        path = find_path(zombie_cx, zombie_cy, player_cx, player_cy)
 
         if path and len(path) > 0:
             next_row, next_col = path[0]
@@ -378,21 +336,21 @@ class Zombie:
         pygame.draw.circle(surface, (150, 50, 50), (int(self.x + self.width // 2 + 6), int(self.y + 12)), 4)
 
 
-def create_walls(level_map):
+def create_walls():
     walls = []
-    for row_idx, row in enumerate(level_map):
+    for row_idx, row in enumerate(LEVEL_MAP):
         for col_idx, cell in enumerate(row):
             if cell == 1:
                 walls.append(Wall(col_idx * TILE_SIZE, row_idx * TILE_SIZE, TILE_SIZE, TILE_SIZE))
     return walls
 
 
-def create_pickups(level_map):
+def create_pickups():
     medkits = []
     ammo_packs = []
     exits = []
     zombies = []
-    for row_idx, row in enumerate(level_map):
+    for row_idx, row in enumerate(LEVEL_MAP):
         for col_idx, cell in enumerate(row):
             if cell == 2:
                 medkits.append(Medkit(col_idx * TILE_SIZE, row_idx * TILE_SIZE))
@@ -518,14 +476,14 @@ class Player:
         surface.blit(rotated, rect.topleft)
 
 
-def draw_ui(surface, player, level, points_to_exit):
+def draw_ui(surface, player, level):
     global font
     if font is None:
         font = pygame.font.Font(None, 36)
     
     hp_text = font.render(f"HP: {player.hp}", True, (255, 80, 80))
     ammo_text = font.render(f"Ammo: {player.ammo}", True, (255, 220, 50))
-    points_text = font.render(f"Points: {player.points}/{points_to_exit}", True, WHITE)
+    points_text = font.render(f"Points: {player.points}/{POINTS_TO_EXIT}", True, WHITE)
     level_text = font.render(f"Level: {level}", True, WHITE)
     
     surface.blit(hp_text, (10, 10))
@@ -536,13 +494,9 @@ def draw_ui(surface, player, level, points_to_exit):
 
 def main():
     level = 1
-    level_data = get_current_level_data(level)
-    current_map = level_data["map"]
-    points_to_exit = level_data["points_to_exit"]
-    
     player = Player(50, SCREEN_HEIGHT - 100)
-    walls = create_walls(current_map)
-    medkits, ammo_packs, exits, zombies = create_pickups(current_map)
+    walls = create_walls()
+    medkits, ammo_packs, exits, zombies = create_pickups()
     bullets = []
     particles = []
     damage_cooldown = 0
@@ -580,7 +534,7 @@ def main():
         player.look_at_mouse(mouse_pos)
 
         for zombie in zombies:
-            zombie.update(player, walls, current_map)
+            zombie.update(player, walls)
 
         for bullet in bullets:
             bullet.update(walls)
@@ -633,7 +587,7 @@ def main():
                         player.x = 50
                         player.y = SCREEN_HEIGHT - 100
                         player.points = 0
-                        medkits, ammo_packs, exits, zombies = create_pickups(current_map)
+                        medkits, ammo_packs, exits, zombies = create_pickups()
                         bullets = []
                 break
 
@@ -646,22 +600,17 @@ def main():
                 player.add_ammo(3)
                 ammo_pack.alive = False
 
-        if player.points >= points_to_exit:
+        if player.points >= POINTS_TO_EXIT:
             for exit_tile in exits:
                 if player_rect.colliderect(exit_tile.rect):
                     level += 1
-                    level_data = get_current_level_data(level)
-                    current_map = level_data["map"]
-                    points_to_exit = level_data["points_to_exit"]
                     player.x = 50
                     player.y = SCREEN_HEIGHT - 100
-                    player.points = 0
-                    walls = create_walls(current_map)
-                    medkits, ammo_packs, exits, zombies = create_pickups(current_map)
+                    medkits, ammo_packs, exits, zombies = create_pickups()
                     bullets = []
                     break
 
-        has_enough_points = player.points >= points_to_exit
+        has_enough_points = player.points >= POINTS_TO_EXIT
 
         for particle in particles:
             particle.update()
@@ -685,7 +634,7 @@ def main():
         for particle in particles:
             particle.draw(screen)
         player.draw(screen)
-        draw_ui(screen, player, level, points_to_exit)
+        draw_ui(screen, player, level)
         pygame.display.flip()
 
         clock.tick(FPS)
