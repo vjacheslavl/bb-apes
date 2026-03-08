@@ -80,23 +80,17 @@ def generate_music(filename):
         wav_file.writeframes(b''.join(samples))
 
 
-generate_sound("shoot.wav", 800, 0.1, 0.15, "square")
+generate_sound("shoot.wav", 800, 0.1, 0.3, "square")
 generate_sound("damage.wav", 200, 0.15, 0.4, "sawtooth")
 generate_sound("growl.wav", 80, 0.3, 0.5, "sawtooth")
-generate_sound("door_break.wav", 80, 0.35, 0.7, "noise")
-generate_sound("exit.wav", 600, 0.25, 0.4, "sine")
-generate_sound("pickup.wav", 1000, 0.1, 0.25, "sine")
 generate_music("music.wav")
 
 shoot_sound = pygame.mixer.Sound("shoot.wav")
 damage_sound = pygame.mixer.Sound("damage.wav")
 growl_sound = pygame.mixer.Sound("growl.wav")
-pickup_sound = pygame.mixer.Sound("pickup.wav")
-door_break_sound = pygame.mixer.Sound("door_break.wav")
-exit_sound = pygame.mixer.Sound("exit.wav")
 
 pygame.mixer.music.load("music.wav")
-pygame.mixer.music.set_volume(0.6)
+pygame.mixer.music.set_volume(0.3)
 pygame.mixer.music.play(-1)
 
 SCREEN_WIDTH = 1200
@@ -106,22 +100,20 @@ FPS = 60
 WHITE = (255, 255, 255)
 BLUE = (50, 100, 200)
 GRAY_LIGHT = (60, 60, 80)
-GRAY_DARK = (50, 50, 70)
+GRAY_DARK = (40, 40, 60)
 WALL_COLOR = (40, 35, 30)
 TILE_SIZE = 50
 PLAYER_SPEED = 3
-BULLET_SPEED = 18
+BULLET_SPEED = 10
 BULLET_COLOR = (255, 220, 50)
 MAX_HP = 3
 MEDKIT_COLOR = (255, 100, 100)
-AMMO_COLOR = (220, 200, 60)
+AMMO_COLOR = (100, 200, 100)
 EXIT_COLOR = (100, 200, 255)
 ZOMBIE_COLOR = (100, 150, 80)
-ZOMBIE_SPEED = 0.7
+ZOMBIE_SPEED = 0.5
 ZOMBIE_HP = 2
 ZOMBIE_SIZE = 40
-FLASHLIGHT_RADIUS = 350
-FLASHLIGHT_CONE_ANGLE = 45
 
 font = None
 
@@ -130,12 +122,12 @@ LEVEL_DATA = [
         "points_to_exit": 4,
         "map": [
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 4, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 5, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1],
             [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-            [1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-            [1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 5, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1],
             [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2, 3, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1],
             [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 6, 6, 1],
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -148,44 +140,44 @@ LEVEL_DATA = [
         ]
     },
     {
-        "points_to_exit": 5,
+        "points_to_exit": 7,
         "map": [
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 3, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1],
-            [1, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 5, 0, 1, 1, 0, 0, 6, 0, 0, 1, 6, 6, 1, 0, 0, 0, 0, 0, 1, 5, 0, 1, 1],
-            [1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1],
-            [1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 5, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 2, 3, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1],
-            [1, 0, 0, 5, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-            [1, 1, 1, 6, 6, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1],
-            [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 3, 0, 0, 0, 4, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1],
+            [1, 0, 1, 5, 0, 0, 0, 0, 5, 1, 0, 0, 0, 0, 1, 5, 0, 0, 0, 0, 5, 1, 0, 1],
+            [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+            [1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1],
+            [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1],
+            [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+            [1, 0, 1, 5, 0, 0, 0, 0, 5, 1, 0, 0, 0, 0, 1, 5, 0, 0, 0, 0, 5, 1, 0, 1],
+            [1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 3, 3, 0, 1, 1, 1, 0, 0, 1, 1, 1, 4, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         ]
     },
     {
-        "points_to_exit": 7,
+        "points_to_exit": 10,
         "map": [
              [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 0, 0, 6, 0, 0, 0, 1, 3, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 3, 1, 1],
-            [1, 0, 5, 6, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 5, 1, 0, 0, 1, 0, 0, 1, 1],
-            [1, 0, 0, 6, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1],
-            [1, 5, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 3, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 6, 3, 0, 0, 0, 0, 1, 1, 5, 0, 1],
-            [1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 6, 5, 0, 0, 0, 0, 1, 1, 0, 0, 1],
-            [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 6, 6, 1, 0, 0, 1, 0, 0, 1, 1],
-            [1, 0, 0, 1, 0, 0, 0, 1, 0, 5, 1, 0, 0, 1, 5, 0, 1, 0, 0, 1, 0, 5, 1, 1],
-            [1, 0, 0, 1, 4, 0, 0, 1, 0, 0, 1, 0, 0, 1, 2, 3, 1, 0, 0, 1, 0, 0, 1, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         ]
     },
@@ -207,60 +199,6 @@ def draw_floor(surface):
             pygame.draw.rect(surface, color, (col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE))
 
 
-def draw_flashlight(surface, player, exits=None, has_enough_points=False, bullets=None):
-    darkness = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-    darkness.fill((0, 0, 0, 220))
-    
-    player_cx = int(player.x + player.width // 2)
-    player_cy = int(player.y + player.height // 2)
-    
-    angle_rad = math.radians(-player.angle)
-    
-    cone_points = [(player_cx, player_cy)]
-    num_points = 20
-    half_angle = math.radians(FLASHLIGHT_CONE_ANGLE)
-    
-    for i in range(num_points + 1):
-        point_angle = angle_rad - half_angle + (2 * half_angle * i / num_points)
-        px = player_cx + math.cos(point_angle) * FLASHLIGHT_RADIUS
-        py = player_cy + math.sin(point_angle) * FLASHLIGHT_RADIUS
-        cone_points.append((int(px), int(py)))
-    
-    pygame.draw.polygon(darkness, (0, 0, 0, 0), cone_points)
-    pygame.draw.circle(darkness, (0, 0, 0, 0), (player_cx, player_cy), 60)
-    
-    if exits and has_enough_points:
-        for exit_tile in exits:
-            exit_cx = exit_tile.rect.centerx
-            exit_cy = exit_tile.rect.centery
-            pygame.draw.circle(darkness, (0, 0, 0, 0), (exit_cx, exit_cy), 100)
-    
-    if bullets:
-        for bullet in bullets:
-            if bullet.alive:
-                pygame.draw.circle(darkness, (0, 0, 0, 0), (int(bullet.x), int(bullet.y)), 40)
-    
-    surface.blit(darkness, (0, 0))
-    
-    if exits and has_enough_points:
-        for exit_tile in exits:
-            exit_cx = exit_tile.rect.centerx
-            exit_cy = exit_tile.rect.centery
-            glow_surface = pygame.Surface((200, 200), pygame.SRCALPHA)
-            pygame.draw.circle(glow_surface, (80, 20, 20, 40), (100, 100), 100)
-            pygame.draw.circle(glow_surface, (100, 30, 30, 60), (100, 100), 70)
-            pygame.draw.circle(glow_surface, (120, 40, 40, 80), (100, 100), 40)
-            surface.blit(glow_surface, (exit_cx - 100, exit_cy - 100))
-    
-    if bullets:
-        for bullet in bullets:
-            if bullet.alive:
-                glow_surface = pygame.Surface((60, 60), pygame.SRCALPHA)
-                pygame.draw.circle(glow_surface, (255, 240, 150, 50), (30, 30), 30)
-                pygame.draw.circle(glow_surface, (255, 250, 180, 80), (30, 30), 18)
-                surface.blit(glow_surface, (int(bullet.x) - 30, int(bullet.y) - 30))
-
-
 class Particle:
     def __init__(self, x, y, color_type="red", direction=None):
         self.x = x
@@ -277,9 +215,6 @@ class Particle:
             self.color = (random.randint(180, 255), random.randint(0, 50), random.randint(0, 50))
         elif color_type == "yellow":
             self.color = (random.randint(200, 255), random.randint(180, 220), random.randint(0, 50))
-        elif color_type == "gray":
-            val = random.randint(150, 200)
-            self.color = (val, val, val + 5)
 
     def update(self):
         self.x += self.vx
@@ -294,59 +229,6 @@ class Particle:
 
 def spawn_particles(x, y, count, color_type="red", direction=None):
     return [Particle(x, y, color_type, direction) for _ in range(count)]
-
-
-class Footprint:
-    def __init__(self, x, y, angle=0):
-        self.x = x
-        self.y = y
-        self.angle = angle
-        self.alpha = 180
-        self.size = random.randint(6, 9)
-        self.offset_x = random.randint(-3, 3)
-        self.offset_y = random.randint(-3, 3)
-
-    def update(self):
-        self.alpha -= 0.5
-        return self.alpha > 0
-
-    def draw(self, surface):
-        if self.alpha > 0:
-            foot_surface = pygame.Surface((self.size * 3, self.size * 3), pygame.SRCALPHA)
-            color = (120, 20, 20, int(self.alpha))
-            cx, cy = self.size * 1.5, self.size * 1.5
-            pygame.draw.ellipse(foot_surface, color, (cx - self.size // 2 - 4, cy - self.size * 0.75, self.size, int(self.size * 1.5)))
-            pygame.draw.ellipse(foot_surface, color, (cx - self.size // 2 + 4, cy - self.size * 0.75, self.size, int(self.size * 1.5)))
-            rotated = pygame.transform.rotate(foot_surface, self.angle + 90)
-            rect = rotated.get_rect(center=(self.x + self.offset_x, self.y + self.offset_y))
-            surface.blit(rotated, rect.topleft)
-
-
-class DustParticle:
-    def __init__(self):
-        self.x = random.randint(0, SCREEN_WIDTH)
-        self.y = random.randint(0, SCREEN_HEIGHT)
-        self.vx = random.uniform(-0.3, 0.3)
-        self.vy = random.uniform(-0.2, 0.2)
-        self.size = random.uniform(1.5, 3.5)
-        self.alpha = random.randint(80, 150)
-
-    def update(self):
-        self.x += self.vx
-        self.y += self.vy
-        if self.x < 0:
-            self.x = SCREEN_WIDTH
-        elif self.x > SCREEN_WIDTH:
-            self.x = 0
-        if self.y < 0:
-            self.y = SCREEN_HEIGHT
-        elif self.y > SCREEN_HEIGHT:
-            self.y = 0
-
-    def draw(self, surface):
-        dust_surface = pygame.Surface((int(self.size * 2), int(self.size * 2)), pygame.SRCALPHA)
-        pygame.draw.circle(dust_surface, (200, 180, 150, self.alpha), (int(self.size), int(self.size)), int(self.size))
-        surface.blit(dust_surface, (int(self.x - self.size), int(self.y - self.size)))
 
 
 class Wall:
@@ -403,21 +285,13 @@ class Exit:
         self.rect = pygame.Rect(x, y, TILE_SIZE, TILE_SIZE)
 
     def draw(self, surface, player_has_enough_points):
-        if player_has_enough_points:
-            door_color = (180, 50, 50)
-            border_color = (140, 35, 35)
-            line_color = (120, 30, 30)
-        else:
-            door_color = (100, 40, 40)
-            border_color = (70, 25, 25)
-            line_color = (55, 20, 20)
-        pygame.draw.rect(surface, door_color, self.rect)
-        pygame.draw.rect(surface, border_color, self.rect, 3)
-        pygame.draw.line(surface, line_color, (self.rect.left + 8, self.rect.top), (self.rect.left + 8, self.rect.bottom), 2)
-        pygame.draw.line(surface, line_color, (self.rect.right - 8, self.rect.top), (self.rect.right - 8, self.rect.bottom), 2)
-        pygame.draw.line(surface, line_color, (self.rect.centerx, self.rect.top), (self.rect.centerx, self.rect.bottom), 2)
-        handle_color = (220, 180, 50) if player_has_enough_points else (80, 65, 30)
-        pygame.draw.circle(surface, handle_color, (self.rect.right - 12, self.rect.centery), 4)
+        color = EXIT_COLOR if player_has_enough_points else (80, 80, 100)
+        pygame.draw.rect(surface, color, self.rect)
+        pygame.draw.polygon(surface, WHITE, [
+            (self.rect.centerx, self.rect.top + 8),
+            (self.rect.left + 8, self.rect.bottom - 8),
+            (self.rect.right - 8, self.rect.bottom - 8)
+        ])
 
 
 class Door:
@@ -430,12 +304,12 @@ class Door:
     def draw(self, surface):
         if not self.alive:
             return
-        pygame.draw.rect(surface, (180, 180, 185), self.rect)
-        pygame.draw.rect(surface, (140, 140, 145), self.rect, 3)
-        pygame.draw.line(surface, (120, 120, 125), (self.rect.left + 8, self.rect.top), (self.rect.left + 8, self.rect.bottom), 2)
-        pygame.draw.line(surface, (120, 120, 125), (self.rect.right - 8, self.rect.top), (self.rect.right - 8, self.rect.bottom), 2)
-        pygame.draw.line(surface, (120, 120, 125), (self.rect.centerx, self.rect.top), (self.rect.centerx, self.rect.bottom), 2)
-        pygame.draw.circle(surface, (90, 90, 95), (self.rect.right - 12, self.rect.centery), 4)
+        pygame.draw.rect(surface, (120, 80, 50), self.rect)
+        pygame.draw.rect(surface, (90, 60, 35), self.rect, 3)
+        pygame.draw.line(surface, (70, 45, 25), (self.rect.left + 8, self.rect.top), (self.rect.left + 8, self.rect.bottom), 2)
+        pygame.draw.line(surface, (70, 45, 25), (self.rect.right - 8, self.rect.top), (self.rect.right - 8, self.rect.bottom), 2)
+        pygame.draw.line(surface, (70, 45, 25), (self.rect.centerx, self.rect.top), (self.rect.centerx, self.rect.bottom), 2)
+        pygame.draw.circle(surface, (180, 150, 50), (self.rect.right - 12, self.rect.centery), 4)
 
 
 def find_path(start_x, start_y, target_x, target_y, level_map, doors=None):
@@ -499,7 +373,6 @@ class Zombie:
         self.path_update_timer = 0
         self.speed_multiplier = 1.0
         self.angle = 0
-        self.footprint_timer = 0
         
         zombie_img = pygame.image.load("zombie.png").convert_alpha()
         self.original_surface = pygame.transform.scale(zombie_img, (self.width, self.height))
@@ -509,7 +382,7 @@ class Zombie:
 
     def update(self, player, walls, level_map, doors):
         if not self.alive:
-            return None
+            return
 
         if self.damage_cooldown > 0:
             self.damage_cooldown -= 1
@@ -557,14 +430,6 @@ class Zombie:
                 if door.alive and zombie_rect.colliderect(door.rect):
                     self.x, self.y = old_x, old_y
                     break
-        
-        footprint = None
-        self.footprint_timer += 1
-        if self.footprint_timer >= 30:
-            self.footprint_timer = 0
-            footprint = Footprint(zombie_cx, zombie_cy + self.height // 3, self.angle)
-        
-        return footprint
 
     def take_damage(self):
         self.hp -= 1
@@ -628,8 +493,6 @@ def break_connected_doors(door, doors):
             if other.alive and other not in broken:
                 if abs(other.row - current.row) + abs(other.col - current.col) == 1:
                     to_break.append(other)
-    
-    return list(broken)
 
 
 class Bullet:
@@ -668,7 +531,7 @@ class Player:
         self.speed = PLAYER_SPEED
         self.angle = 0
         self.hp = 3
-        self.ammo = 2
+        self.ammo = 3
         self.points = 0
         
         player_img = pygame.image.load("player.png").convert_alpha()
@@ -774,8 +637,6 @@ def main():
     medkits, ammo_packs, exits, zombies, doors = create_pickups(current_map)
     bullets = []
     particles = []
-    footprints = []
-    dust_particles = [DustParticle() for _ in range(100)]
     damage_cooldown = 0
 
     running = True
@@ -786,17 +647,6 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
-                if event.key == pygame.K_r:
-                    player.hp = MAX_HP
-                    player.ammo = 2
-                    player.x = 50
-                    player.y = SCREEN_HEIGHT - 100
-                    player.points = 0
-                    walls = create_walls(current_map)
-                    medkits, ammo_packs, exits, zombies, doors = create_pickups(current_map)
-                    bullets = []
-                    particles = []
-                    footprints = []
                 if event.key == pygame.K_SPACE:
                     bullet = player.shoot(walls)
                     if bullet:
@@ -822,9 +672,7 @@ def main():
         player.look_at_mouse(mouse_pos)
 
         for zombie in zombies:
-            footprint = zombie.update(player, walls, current_map, doors)
-            if footprint:
-                footprints.append(footprint)
+            zombie.update(player, walls, current_map, doors)
 
         for bullet in bullets:
             bullet.update(walls)
@@ -860,12 +708,10 @@ def main():
             for door in doors:
                 if door.alive and door.rect.collidepoint(bullet.x, bullet.y):
                     bullet.alive = False
-                    broken_doors = break_connected_doors(door, doors)
-                    door_break_sound.play()
-                    for broken_door in broken_doors:
-                        door_cx = broken_door.rect.centerx
-                        door_cy = broken_door.rect.centery
-                        particles.extend(spawn_particles(door_cx, door_cy, 20, "gray"))
+                    door_cx = door.rect.centerx
+                    door_cy = door.rect.centery
+                    particles.extend(spawn_particles(door_cx, door_cy, 15, "yellow"))
+                    break_connected_doors(door, doors)
                     break
         bullets = [b for b in bullets if b.alive]
 
@@ -886,7 +732,7 @@ def main():
                     if player.hp <= 0:
                         particles.extend(spawn_particles(player_cx, player_cy, 30))
                         player.hp = MAX_HP
-                        player.ammo = 2
+                        player.ammo = 3
                         player.x = 50
                         player.y = SCREEN_HEIGHT - 100
                         player.points = 0
@@ -898,17 +744,14 @@ def main():
             if medkit.alive and player_rect.colliderect(medkit.rect):
                 player.heal(1)
                 medkit.alive = False
-                pickup_sound.play()
         for ammo_pack in ammo_packs:
             if ammo_pack.alive and player_rect.colliderect(ammo_pack.rect):
                 player.add_ammo(3)
                 ammo_pack.alive = False
-                pickup_sound.play()
 
         if player.points >= points_to_exit:
             for exit_tile in exits:
                 if player_rect.colliderect(exit_tile.rect):
-                    exit_sound.play()
                     level += 1
                     level_data = get_current_level_data(level)
                     current_map = level_data["map"]
@@ -916,7 +759,6 @@ def main():
                     player.x = 50
                     player.y = SCREEN_HEIGHT - 100
                     player.points = 0
-                    player.ammo = 2
                     walls = create_walls(current_map)
                     medkits, ammo_packs, exits, zombies, doors = create_pickups(current_map)
                     bullets = []
@@ -927,15 +769,8 @@ def main():
         for particle in particles:
             particle.update()
         particles = [p for p in particles if p.lifetime > 0]
-        
-        footprints = [f for f in footprints if f.update()]
-        
-        for dust in dust_particles:
-            dust.update()
 
         draw_floor(screen)
-        for footprint in footprints:
-            footprint.draw(screen)
         for exit_tile in exits:
             exit_tile.draw(screen, has_enough_points)
         for wall in walls:
@@ -955,9 +790,6 @@ def main():
         for particle in particles:
             particle.draw(screen)
         player.draw(screen)
-        for dust in dust_particles:
-            dust.draw(screen)
-        draw_flashlight(screen, player, exits, has_enough_points, bullets)
         draw_ui(screen, player, level, points_to_exit)
         pygame.display.flip()
 
