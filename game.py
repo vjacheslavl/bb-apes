@@ -7,6 +7,14 @@ import wave
 import os
 from collections import deque
 
+
+def get_resource_path(filename):
+    if getattr(sys, 'frozen', False):
+        base_path = sys._MEIPASS
+    else:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, filename)
+
 pygame.init()
 pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=512)
 
@@ -80,22 +88,22 @@ def generate_music(filename):
         wav_file.writeframes(b''.join(samples))
 
 
-generate_sound("shoot.wav", 800, 0.1, 0.15, "square")
-generate_sound("damage.wav", 200, 0.15, 0.4, "sawtooth")
-generate_sound("growl.wav", 80, 0.3, 0.5, "sawtooth")
-generate_sound("door_break.wav", 80, 0.35, 0.7, "noise")
-generate_sound("exit.wav", 600, 0.25, 0.4, "sine")
-generate_sound("pickup.wav", 1000, 0.1, 0.25, "sine")
-generate_music("music.wav")
+generate_sound(get_resource_path("shoot.wav"), 800, 0.1, 0.15, "square")
+generate_sound(get_resource_path("damage.wav"), 200, 0.15, 0.4, "sawtooth")
+generate_sound(get_resource_path("growl.wav"), 80, 0.3, 0.5, "sawtooth")
+generate_sound(get_resource_path("door_break.wav"), 80, 0.35, 0.7, "noise")
+generate_sound(get_resource_path("exit.wav"), 600, 0.25, 0.4, "sine")
+generate_sound(get_resource_path("pickup.wav"), 1000, 0.1, 0.25, "sine")
+generate_music(get_resource_path("music.wav"))
 
-shoot_sound = pygame.mixer.Sound("shoot.wav")
-damage_sound = pygame.mixer.Sound("damage.wav")
-growl_sound = pygame.mixer.Sound("growl.wav")
-pickup_sound = pygame.mixer.Sound("pickup.wav")
-door_break_sound = pygame.mixer.Sound("door_break.wav")
-exit_sound = pygame.mixer.Sound("exit.wav")
+shoot_sound = pygame.mixer.Sound(get_resource_path("shoot.wav"))
+damage_sound = pygame.mixer.Sound(get_resource_path("damage.wav"))
+growl_sound = pygame.mixer.Sound(get_resource_path("growl.wav"))
+pickup_sound = pygame.mixer.Sound(get_resource_path("pickup.wav"))
+door_break_sound = pygame.mixer.Sound(get_resource_path("door_break.wav"))
+exit_sound = pygame.mixer.Sound(get_resource_path("exit.wav"))
 
-pygame.mixer.music.load("music.wav")
+pygame.mixer.music.load(get_resource_path("music.wav"))
 pygame.mixer.music.set_volume(0.6)
 pygame.mixer.music.play(-1)
 
@@ -501,7 +509,7 @@ class Zombie:
         self.angle = 0
         self.footprint_timer = 0
         
-        zombie_img = pygame.image.load("zombie.png").convert_alpha()
+        zombie_img = pygame.image.load(get_resource_path("zombie.png")).convert_alpha()
         self.original_surface = pygame.transform.scale(zombie_img, (self.width, self.height))
 
     def get_rect(self):
@@ -671,7 +679,7 @@ class Player:
         self.ammo = 2
         self.points = 0
         
-        player_img = pygame.image.load("player.png").convert_alpha()
+        player_img = pygame.image.load(get_resource_path("player.png")).convert_alpha()
         self.original_surface = pygame.transform.scale(player_img, (self.width, self.height))
 
     def shoot(self, walls):
