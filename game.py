@@ -88,13 +88,60 @@ def generate_music(filename):
         wav_file.writeframes(b''.join(samples))
 
 
-generate_sound(get_resource_path("shoot.wav"), 800, 0.1, 0.15, "square")
+def generate_menu_music(filename):
+    if os.path.exists(filename):
+        return
+    sample_rate = 22050
+    duration = 16.0
+    num_samples = int(sample_rate * duration)
+    
+    samples = []
+    base_freqs = [55, 51.91, 49, 46.25]
+    
+    for i in range(num_samples):
+        t = i / sample_rate
+        section = int(t / 4.0) % 4
+        freq = base_freqs[section]
+        
+        value = 0
+        value += 0.2 * math.sin(2 * math.pi * freq * t)
+        value += 0.1 * math.sin(2 * math.pi * freq * 2 * t) * math.sin(t * 0.1)
+        
+        square = 1 if math.sin(2 * math.pi * freq * 0.25 * t) > 0 else -1
+        value += 0.08 * square
+        
+        drone = math.sin(2 * math.pi * 30 * t + math.sin(t * 0.3) * 2)
+        value += 0.12 * drone
+        
+        beat_pos = (t * 0.8) % 1
+        if beat_pos < 0.15:
+            beat_env = 1 - (beat_pos / 0.15)
+            beat_square = 1 if math.sin(2 * math.pi * 60 * t) > 0 else -1
+            value += 0.15 * beat_square * beat_env
+        
+        value += 0.04 * random.uniform(-1, 1)
+        
+        pulse = 0.7 + 0.3 * math.sin(2 * math.pi * 0.1 * t)
+        value *= pulse * 0.35
+        
+        value = int(value * 32767)
+        samples.append(struct.pack('<h', max(-32768, min(32767, value))))
+    
+    with wave.open(filename, 'w') as wav_file:
+        wav_file.setnchannels(1)
+        wav_file.setsampwidth(2)
+        wav_file.setframerate(sample_rate)
+        wav_file.writeframes(b''.join(samples))
+
+
+generate_sound(get_resource_path("shoot.wav"), 800, 0.1, 0.05, "square")
 generate_sound(get_resource_path("damage.wav"), 200, 0.15, 0.4, "sawtooth")
 generate_sound(get_resource_path("growl.wav"), 80, 0.3, 0.5, "sawtooth")
 generate_sound(get_resource_path("door_break.wav"), 80, 0.35, 0.7, "noise")
 generate_sound(get_resource_path("exit.wav"), 600, 0.25, 0.4, "sine")
 generate_sound(get_resource_path("pickup.wav"), 1000, 0.1, 0.25, "sine")
 generate_music(get_resource_path("music.wav"))
+generate_menu_music(get_resource_path("menu_music.wav"))
 
 shoot_sound = pygame.mixer.Sound(get_resource_path("shoot.wav"))
 damage_sound = pygame.mixer.Sound(get_resource_path("damage.wav"))
@@ -103,9 +150,6 @@ pickup_sound = pygame.mixer.Sound(get_resource_path("pickup.wav"))
 door_break_sound = pygame.mixer.Sound(get_resource_path("door_break.wav"))
 exit_sound = pygame.mixer.Sound(get_resource_path("exit.wav"))
 
-pygame.mixer.music.load(get_resource_path("music.wav"))
-pygame.mixer.music.set_volume(0.6)
-pygame.mixer.music.play(-1)
 
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 800
@@ -142,16 +186,16 @@ LEVEL_DATA = [
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 5, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1],
             [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-            [1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-            [1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 5, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+            [1, 0, 0, 1.1, 1.1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+            [1, 0, 0, 1.1, 1.1, 1, 0, 0, 0, 1, 0, 5, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1],
             [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2, 3, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1],
             [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 6, 6, 1],
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+            [1, 1.2, 1.2, 0, 0, 6, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 5, 0, 0, 1],
-            [1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 3, 0, 1],
+            [1, 0, 0, 0, 0, 1, 0, 1.2, 1.2, 0, 0, 1.2, 1.2, 0, 0, 1.2, 1.2, 0, 1, 0, 0, 3, 0, 1],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         ]
     },
@@ -161,39 +205,123 @@ LEVEL_DATA = [
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [1, 3, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1],
             [1, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 5, 0, 1, 1, 0, 0, 6, 0, 0, 1, 6, 6, 1, 0, 0, 0, 0, 0, 1, 5, 0, 1, 1],
-            [1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1],
-            [1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 5, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 2, 3, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1],
+            [1, 5, 0, 1.2, 1.2, 0, 0, 6, 0, 0, 1, 6, 6, 1, 0, 0, 0, 0, 0, 1.1, 5, 0, 1.1, 1],
+            [1, 0, 0, 1.2, 1.2, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1.1, 0, 0, 1.1, 1],
+            [1, 0, 0, 1.2, 1.2, 0, 0, 1, 0, 0, 1, 0, 5, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 1.2, 1.2, 0, 0, 1, 0, 0, 1, 2, 3, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 1.2, 1.2, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1.1, 1.1, 0, 0, 1],
             [1, 0, 0, 5, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
             [1, 1, 1, 6, 6, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1],
-            [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 3, 0, 0, 0, 4, 1],
+            [1, 0, 0, 0, 0, 0, 0, 1.1, 1.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 1.1, 1.1, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.1, 1.1, 1.1, 1.1, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 1.2, 1.2, 0, 0, 0, 0, 0, 0, 0, 0, 1.1, 1.1, 1.1, 1.1, 3, 0, 0, 0, 4, 1],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         ]
     },
     {
         "points_to_exit": 7,
         "map": [
-             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 0, 0, 6, 0, 0, 0, 1, 3, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 3, 1, 1],
-            [1, 0, 5, 6, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 5, 1, 0, 0, 1, 0, 0, 1, 1],
-            [1, 0, 0, 6, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 6, 0, 0, 1.2, 1, 3, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 3, 1, 1],
+            [1, 0, 5, 6, 0, 0, 1.2, 1, 0, 0, 1, 0, 0, 1, 0, 5, 1, 0, 0, 1, 0, 0, 1, 1],
+            [1, 0, 0, 6, 0, 0, 1.2, 1, 0, 0, 1, 0, 0, 1, 6.1, 6.1, 1, 6,1, 6,1, 1, 0, 0, 1, 1],
             [1, 5, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 3, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 6, 3, 0, 0, 0, 0, 1, 1, 5, 0, 1],
-            [1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 6, 5, 0, 0, 0, 0, 1, 1, 0, 0, 1],
+            [1, 0, 3, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 6.1, 3, 0, 0, 0, 0, 1, 1, 0, 0, 1],
+            [1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 6.1, 5, 0, 0, 0, 0, 1, 1, 0, 0, 1],
             [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 6, 6, 1, 0, 0, 1, 0, 0, 1, 1],
-            [1, 0, 0, 1, 0, 0, 0, 1, 0, 5, 1, 0, 0, 1, 5, 0, 1, 0, 0, 1, 0, 5, 1, 1],
-            [1, 0, 0, 1, 4, 0, 0, 1, 0, 0, 1, 0, 0, 1, 2, 3, 1, 0, 0, 1, 0, 0, 1, 1],
+            [1, 0, 0, 1, 0, 0, 1.2, 1, 0, 0, 1, 6.1, 6.1, 1, 6.1, 6.1, 1, 0, 0, 1, 0, 0, 1, 1],
+            [1, 0, 0, 1, 0, 0, 1.2, 1, 0, 5, 1, 0, 0, 1, 5, 0, 1, 0, 0, 1, 0, 5, 1, 1],
+            [1, 0, 0, 1, 4, 0, 1.2, 1, 0, 0, 1, 0, 0, 1, 2, 3, 1, 0, 0, 1, 0, 0, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        ]
+    },
+    {
+        "points_to_exit": 1,
+        "map": [
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 0, 0, 6.1, 0, 0, 6.1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 5, 0, 6.1, 5, 0, 6.1, 0, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 2, 1, 1.2, 1.2, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1.2, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1.2, 0, 0, 0, 1, 0, 0, 1],
+            [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1.2, 0, 0, 0, 1, 0, 0, 1],
+            [1, 0, 0, 1, 0, 0, 0, 0, 0, 1.2, 1.2, 1.2, 1.2, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1],
+            [1, 0, 0, 1, 0, 0, 1, 0, 0, 1.2, 1.2, 1.2, 1.2, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1],
+            [1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1],
+            [1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 4, 1],
+            [1, 0, 0, 1, 0, 0, 0, 0, 1.2, 1.2, 1.2, 1.2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+            [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 6],
+            [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.2, 1.2, 1.2, 1.2, 1.2, 1, 0, 0, 6],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.3, 1, 1],
+        ]
+    },
+    {
+        "points_to_exit": 0,
+        "map": [
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        ]
+    },
+    {
+        "points_to_exit": 0,
+        "map": [
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        ]
+    },
+    {
+        "points_to_exit": 0,
+        "map": [
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         ]
     },
@@ -204,7 +332,7 @@ def get_current_level_data(level):
     return LEVEL_DATA[idx]
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("WASD Movement Game")
+pygame.display.set_caption("Evil Residents")
 clock = pygame.time.Clock()
 
 
@@ -215,7 +343,7 @@ def draw_floor(surface):
             pygame.draw.rect(surface, color, (col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE))
 
 
-def draw_flashlight(surface, player, exits=None, has_enough_points=False, bullets=None):
+def draw_flashlight(surface, player, exits=None, has_enough_points=False, bullets=None, alarm_tiles=None):
     darkness = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
     darkness.fill((0, 0, 0, 220))
     
@@ -248,6 +376,13 @@ def draw_flashlight(surface, player, exits=None, has_enough_points=False, bullet
             if bullet.alive:
                 pygame.draw.circle(darkness, (0, 0, 0, 0), (int(bullet.x), int(bullet.y)), 40)
     
+    if alarm_tiles:
+        for alarm in alarm_tiles:
+            if alarm.active:
+                alarm_cx = alarm.rect.centerx
+                alarm_cy = alarm.rect.centery
+                pygame.draw.circle(darkness, (0, 0, 0, 0), (alarm_cx, alarm_cy), 120)
+    
     surface.blit(darkness, (0, 0))
     
     if exits and has_enough_points:
@@ -267,6 +402,17 @@ def draw_flashlight(surface, player, exits=None, has_enough_points=False, bullet
                 pygame.draw.circle(glow_surface, (255, 240, 150, 50), (30, 30), 30)
                 pygame.draw.circle(glow_surface, (255, 250, 180, 80), (30, 30), 18)
                 surface.blit(glow_surface, (int(bullet.x) - 30, int(bullet.y) - 30))
+    
+    if alarm_tiles:
+        for alarm in alarm_tiles:
+            if alarm.active:
+                alarm_cx = alarm.rect.centerx
+                alarm_cy = alarm.rect.centery
+                glow_surface = pygame.Surface((240, 240), pygame.SRCALPHA)
+                pygame.draw.circle(glow_surface, (150, 20, 20, 30), (120, 120), 120)
+                pygame.draw.circle(glow_surface, (180, 30, 30, 50), (120, 120), 80)
+                pygame.draw.circle(glow_surface, (200, 40, 40, 70), (120, 120), 40)
+                surface.blit(glow_surface, (alarm_cx - 120, alarm_cy - 120))
 
 
 class Particle:
@@ -385,6 +531,79 @@ class Wall:
         pygame.draw.rect(surface, (60, 50, 45), self.rect, 2)
 
 
+class CleanMetal:
+    def __init__(self, x, y, width, height):
+        self.rect = pygame.Rect(x, y, width, height)
+
+    def draw(self, surface):
+        pygame.draw.rect(surface, (80, 85, 90), self.rect)
+
+
+class AlarmTile:
+    def __init__(self, x, y, width, height):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.phase_timer = 0
+        self.phase_duration = 42
+        self.active = False
+    
+    def update(self):
+        self.phase_timer += 1
+        if self.phase_timer >= self.phase_duration:
+            self.phase_timer = 0
+            self.active = not self.active
+    
+    def draw(self, surface):
+        pygame.draw.rect(surface, WALL_COLOR, self.rect)
+        
+        brick_color = (55, 45, 40)
+        mortar_color = (30, 25, 20)
+        brick_h = 12
+        brick_w = 24
+        
+        for row in range(self.rect.height // brick_h + 1):
+            offset = (brick_w // 2) if row % 2 else 0
+            y = self.rect.top + row * brick_h
+            if y >= self.rect.bottom:
+                break
+            pygame.draw.line(surface, mortar_color, (self.rect.left, y), (self.rect.right, y), 1)
+            for col in range(-1, self.rect.width // brick_w + 2):
+                x = self.rect.left + col * brick_w + offset
+                if self.rect.left <= x <= self.rect.right:
+                    pygame.draw.line(surface, mortar_color, (x, y), (x, min(y + brick_h, self.rect.bottom)), 1)
+        
+        pygame.draw.rect(surface, (60, 50, 45), self.rect, 2)
+        
+        center = (self.rect.centerx, self.rect.centery)
+        if self.active:
+            pygame.draw.circle(surface, (200, 30, 30), center, 10)
+            pygame.draw.circle(surface, (255, 80, 80), center, 6)
+        else:
+            pygame.draw.circle(surface, (20, 20, 20), center, 10)
+            pygame.draw.circle(surface, (40, 40, 40), center, 6)
+
+
+class MetalLocker:
+    def __init__(self, x, y, width, height):
+        self.rect = pygame.Rect(x, y, width, height)
+
+    def draw(self, surface):
+        base_color = (90, 100, 110)
+        pygame.draw.rect(surface, base_color, self.rect)
+        door_color = (100, 110, 120)
+        door_rect = pygame.Rect(self.rect.left + 4, self.rect.top + 4, self.rect.width - 8, self.rect.height - 8)
+        pygame.draw.rect(surface, door_color, door_rect)
+        vent_color = (60, 65, 75)
+        vent_y_start = self.rect.top + 10
+        for i in range(4):
+            vent_y = vent_y_start + i * 6
+            pygame.draw.line(surface, vent_color, (self.rect.left + 10, vent_y), (self.rect.right - 10, vent_y), 2)
+        handle_color = (70, 75, 85)
+        handle_rect = pygame.Rect(self.rect.right - 14, self.rect.centery - 8, 6, 16)
+        pygame.draw.rect(surface, handle_color, handle_rect)
+        pygame.draw.rect(surface, (75, 80, 90), door_rect, 2)
+        pygame.draw.rect(surface, (70, 75, 85), self.rect, 2)
+
+
 class Medkit:
     def __init__(self, x, y):
         self.rect = pygame.Rect(x + 10, y + 10, 30, 30)
@@ -446,6 +665,30 @@ class Door:
         pygame.draw.circle(surface, (90, 90, 95), (self.rect.right - 12, self.rect.centery), 4)
 
 
+class PrisonBars:
+    def __init__(self, x, y, row, col):
+        self.rect = pygame.Rect(x, y, TILE_SIZE, TILE_SIZE)
+        self.row = row
+        self.col = col
+        self.alive = True
+
+    def draw(self, surface):
+        if not self.alive:
+            return
+        bar_color = (50, 55, 60)
+        bar_highlight = (80, 85, 95)
+        frame_color = (40, 45, 50)
+        pygame.draw.rect(surface, frame_color, (self.rect.left, self.rect.top, self.rect.width, 6))
+        pygame.draw.rect(surface, frame_color, (self.rect.left, self.rect.bottom - 6, self.rect.width, 6))
+        num_bars = 5
+        bar_width = 6
+        spacing = (self.rect.width - num_bars * bar_width) // (num_bars + 1)
+        for i in range(num_bars):
+            bar_x = self.rect.left + spacing + i * (bar_width + spacing)
+            pygame.draw.rect(surface, bar_color, (bar_x, self.rect.top + 6, bar_width, self.rect.height - 12))
+            pygame.draw.line(surface, bar_highlight, (bar_x + 1, self.rect.top + 6), (bar_x + 1, self.rect.bottom - 6), 1)
+
+
 def find_path(start_x, start_y, target_x, target_y, level_map, doors=None):
     start_col = int(start_x // TILE_SIZE)
     start_row = int(start_y // TILE_SIZE)
@@ -481,7 +724,8 @@ def find_path(start_x, start_y, target_x, target_y, level_map, doors=None):
             new_row, new_col = row + dr, col + dc
 
             if 0 <= new_row < rows and 0 <= new_col < cols:
-                is_wall = level_map[new_row][new_col] == 1
+                cell_value = level_map[new_row][new_col]
+                is_wall = cell_value == 1 or cell_value == 1.1 or cell_value == 1.2 or cell_value == 1.3
                 is_blocked_door = (new_row, new_col) in blocked_doors
                 if (new_row, new_col) not in visited and not is_wall and not is_blocked_door:
                     new_path = path + [(new_row, new_col)]
@@ -593,11 +837,20 @@ class Zombie:
 
 def create_walls(level_map):
     walls = []
+    alarm_tiles = []
     for row_idx, row in enumerate(level_map):
         for col_idx, cell in enumerate(row):
             if cell == 1:
                 walls.append(Wall(col_idx * TILE_SIZE, row_idx * TILE_SIZE, TILE_SIZE, TILE_SIZE))
-    return walls
+            elif cell == 1.1:
+                walls.append(CleanMetal(col_idx * TILE_SIZE, row_idx * TILE_SIZE, TILE_SIZE, TILE_SIZE))
+            elif cell == 1.2:
+                walls.append(MetalLocker(col_idx * TILE_SIZE, row_idx * TILE_SIZE, TILE_SIZE, TILE_SIZE))
+            elif cell == 1.3:
+                alarm = AlarmTile(col_idx * TILE_SIZE, row_idx * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+                walls.append(alarm)
+                alarm_tiles.append(alarm)
+    return walls, alarm_tiles
 
 
 def create_pickups(level_map):
@@ -618,6 +871,8 @@ def create_pickups(level_map):
                 zombies.append(Zombie(col_idx * TILE_SIZE, row_idx * TILE_SIZE))
             elif cell == 6:
                 doors.append(Door(col_idx * TILE_SIZE, row_idx * TILE_SIZE, row_idx, col_idx))
+            elif cell == 6.1:
+                doors.append(PrisonBars(col_idx * TILE_SIZE, row_idx * TILE_SIZE, row_idx, col_idx))
     return medkits, ammo_packs, exits, zombies, doors
 
 
@@ -771,20 +1026,235 @@ def draw_ui(surface, player, level, points_to_exit):
     surface.blit(location_text, (SCREEN_WIDTH - location_text.get_width() - 10, 80))
 
 
+class MenuZombie:
+    def __init__(self):
+        self.x = random.randint(100, SCREEN_WIDTH - 100)
+        self.y = random.randint(100, SCREEN_HEIGHT - 100)
+        self.size = 50
+        self.speed = 1.5
+        self.angle = 0
+        zombie_img = pygame.image.load(get_resource_path("zombie.png")).convert_alpha()
+        self.surface = pygame.transform.scale(zombie_img, (self.size, self.size))
+    
+    def update(self, mouse_pos):
+        dx = mouse_pos[0] - self.x
+        dy = mouse_pos[1] - self.y
+        dist = math.sqrt(dx * dx + dy * dy)
+        
+        if dist > 5:
+            self.x += (dx / dist) * self.speed
+            self.y += (dy / dist) * self.speed
+        
+        self.angle = -math.degrees(math.atan2(dy, dx))
+    
+    def draw(self, surface):
+        rotated = pygame.transform.rotate(self.surface, self.angle)
+        rect = rotated.get_rect(center=(self.x, self.y))
+        surface.blit(rotated, rect.topleft)
+
+
+def draw_menu(surface, selected_option, menu_zombie=None):
+    surface.fill((20, 20, 25))
+    
+    if menu_zombie:
+        menu_zombie.draw(surface)
+
+    title_font = pygame.font.Font(None, 80)
+    menu_font = pygame.font.Font(None, 50)
+
+    title_text = title_font.render("Evil Residents", True, (200, 50, 50))
+    title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, 200))
+    surface.blit(title_text, title_rect)
+
+    subtitle_font = pygame.font.Font(None, 30)
+    subtitle_text = subtitle_font.render("Survive the outbreak", True, (150, 150, 150))
+    subtitle_rect = subtitle_text.get_rect(center=(SCREEN_WIDTH // 2, 260))
+    surface.blit(subtitle_text, subtitle_rect)
+
+    menu_options = ["Start Game", "Quit"]
+    for i, option in enumerate(menu_options):
+        if i == selected_option:
+            color = (255, 100, 100)
+            prefix = "> "
+            suffix = " <"
+        else:
+            color = (180, 180, 180)
+            prefix = ""
+            suffix = ""
+
+        option_text = menu_font.render(f"{prefix}{option}{suffix}", True, color)
+        option_rect = option_text.get_rect(center=(SCREEN_WIDTH // 2, 400 + i * 60))
+        surface.blit(option_text, option_rect)
+
+    controls_font = pygame.font.Font(None, 24)
+    controls = ["WASD - Move", "Mouse - Aim", "Left Click / Space - Shoot", "R - Restart Level", "ESC - Quit"]
+    for i, control in enumerate(controls):
+        control_text = controls_font.render(control, True, (100, 100, 100))
+        control_rect = control_text.get_rect(center=(SCREEN_WIDTH // 2, 550 + i * 25))
+        surface.blit(control_text, control_rect)
+
+
+def show_menu(screen, clock):
+    pygame.mixer.music.load(get_resource_path("menu_music.wav"))
+    pygame.mixer.music.set_volume(0.5)
+    pygame.mixer.music.play(-1)
+    
+    menu_zombie = MenuZombie()
+    selected_option = 0
+    num_options = 2
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return "quit"
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP or event.key == pygame.K_w:
+                    selected_option = (selected_option - 1) % num_options
+                elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                    selected_option = (selected_option + 1) % num_options
+                elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
+                    if selected_option == 0:
+                        return "start"
+                    elif selected_option == 1:
+                        return "quit"
+                elif event.key == pygame.K_ESCAPE:
+                    return "quit"
+
+        mouse_pos = pygame.mouse.get_pos()
+        menu_zombie.update(mouse_pos)
+        
+        draw_menu(screen, selected_option, menu_zombie)
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
+def show_intro_cutscene(screen, clock):
+    story_lines = [
+        "This was supposed to be my first day as a police officer...",
+        "Only for me to find out that the city has fallen.",
+        "The police station is overrun with the infected.",
+        "Maybe there are still some survivors...",
+        "I'll have to try and find them.",
+        "And if there's none...",
+        "I'll have to make my own way out.",
+    ]
+    
+    font = pygame.font.Font(None, 40)
+    small_font = pygame.font.Font(None, 28)
+    
+    char_delay = 50
+    line_delay = 800
+    
+    displayed_text = []
+    current_line = 0
+    current_char = 0
+    last_char_time = pygame.time.get_ticks()
+    last_line_time = pygame.time.get_ticks()
+    waiting_for_line = False
+    
+    fade_alpha = 255
+    fade_in = True
+    
+    while True:
+        current_time = pygame.time.get_ticks()
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return "quit"
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return "skip"
+                if event.key == pygame.K_SPACE or event.key == pygame.K_RETURN:
+                    return "skip"
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                return "skip"
+        
+        if fade_in:
+            fade_alpha -= 5
+            if fade_alpha <= 0:
+                fade_alpha = 0
+                fade_in = False
+        
+        if not fade_in and current_line < len(story_lines):
+            if waiting_for_line:
+                if current_time - last_line_time >= line_delay:
+                    waiting_for_line = False
+                    current_line += 1
+                    current_char = 0
+                    if current_line < len(story_lines):
+                        displayed_text.append("")
+            else:
+                if current_line < len(story_lines):
+                    line = story_lines[current_line]
+                    if current_char < len(line):
+                        if current_time - last_char_time >= char_delay:
+                            if len(displayed_text) <= current_line:
+                                displayed_text.append("")
+                            displayed_text[current_line] += line[current_char]
+                            current_char += 1
+                            last_char_time = current_time
+                    else:
+                        waiting_for_line = True
+                        last_line_time = current_time
+        
+        if current_line >= len(story_lines) and not waiting_for_line:
+            pygame.time.wait(1500)
+            return "done"
+        
+        screen.fill((10, 10, 15))
+        
+        y_offset = 200
+        for i, line in enumerate(displayed_text):
+            if line:
+                text_surface = font.render(line, True, (180, 180, 180))
+                text_rect = text_surface.get_rect(center=(SCREEN_WIDTH // 2, y_offset + i * 45))
+                screen.blit(text_surface, text_rect)
+            else:
+                y_offset -= 20
+        
+        skip_text = small_font.render("Press SPACE to skip", True, (80, 80, 80))
+        skip_rect = skip_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 50))
+        screen.blit(skip_text, skip_rect)
+        
+        if fade_alpha > 0:
+            fade_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+            fade_surface.fill((0, 0, 0))
+            fade_surface.set_alpha(fade_alpha)
+            screen.blit(fade_surface, (0, 0))
+        
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
 def main():
+    menu_result = show_menu(screen, clock)
+    if menu_result == "quit":
+        pygame.quit()
+        sys.exit()
+    
+    cutscene_result = show_intro_cutscene(screen, clock)
+    if cutscene_result == "quit":
+        pygame.quit()
+        sys.exit()
+
+    pygame.mixer.music.load(get_resource_path("music.wav"))
+    pygame.mixer.music.set_volume(0.6)
+    pygame.mixer.music.play(-1)
+
     level = 1
     level_data = get_current_level_data(level)
     current_map = level_data["map"]
     points_to_exit = level_data["points_to_exit"]
     
     player = Player(50, SCREEN_HEIGHT - 100)
-    walls = create_walls(current_map)
+    walls, alarm_tiles = create_walls(current_map)
     medkits, ammo_packs, exits, zombies, doors = create_pickups(current_map)
     bullets = []
     particles = []
     footprints = []
     dust_particles = [DustParticle() for _ in range(100)]
     damage_cooldown = 0
+    skip_level_cooldown = 0
 
     running = True
     while running:
@@ -800,7 +1270,7 @@ def main():
                     player.x = 50
                     player.y = SCREEN_HEIGHT - 100
                     player.points = 0
-                    walls = create_walls(current_map)
+                    walls, alarm_tiles = create_walls(current_map)
                     medkits, ammo_packs, exits, zombies, doors = create_pickups(current_map)
                     bullets = []
                     particles = []
@@ -825,6 +1295,25 @@ def main():
 
         keys = pygame.key.get_pressed()
         player.handle_input(keys, walls, doors)
+        
+        if skip_level_cooldown > 0:
+            skip_level_cooldown -= 1
+        
+        if keys[pygame.K_l] and keys[pygame.K_k] and skip_level_cooldown == 0 and level < len(LEVEL_DATA):
+            skip_level_cooldown = 60
+            level += 1
+            level_data = get_current_level_data(level)
+            current_map = level_data["map"]
+            points_to_exit = level_data["points_to_exit"]
+            player.x = 50
+            player.y = SCREEN_HEIGHT - 100
+            player.points = 0
+            player.ammo = 2
+            walls, alarm_tiles = create_walls(current_map)
+            medkits, ammo_packs, exits, zombies, doors = create_pickups(current_map)
+            bullets = []
+            particles = []
+            footprints = []
         
         mouse_pos = pygame.mouse.get_pos()
         player.look_at_mouse(mouse_pos)
@@ -925,7 +1414,7 @@ def main():
                     player.y = SCREEN_HEIGHT - 100
                     player.points = 0
                     player.ammo = 2
-                    walls = create_walls(current_map)
+                    walls, alarm_tiles = create_walls(current_map)
                     medkits, ammo_packs, exits, zombies, doors = create_pickups(current_map)
                     bullets = []
                     break
@@ -965,7 +1454,9 @@ def main():
         player.draw(screen)
         for dust in dust_particles:
             dust.draw(screen)
-        draw_flashlight(screen, player, exits, has_enough_points, bullets)
+        for alarm in alarm_tiles:
+            alarm.update()
+        draw_flashlight(screen, player, exits, has_enough_points, bullets, alarm_tiles)
         draw_ui(screen, player, level, points_to_exit)
         pygame.display.flip()
 
